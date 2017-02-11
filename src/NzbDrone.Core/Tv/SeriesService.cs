@@ -18,6 +18,7 @@ namespace NzbDrone.Core.Tv
         Series GetSeries(int seriesId);
         List<Series> GetSeries(IEnumerable<int> seriesIds);
         Series AddSeries(Series newSeries);
+        List<Series> AddSeries(List<Series> newSeries);
         Series FindByTvdbId(int tvdbId);
         Series FindByTvRageId(int tvRageId);
         Series FindByTitle(string title);
@@ -69,6 +70,14 @@ namespace NzbDrone.Core.Tv
         {
             _seriesRepository.Insert(newSeries);
             _eventAggregator.PublishEvent(new SeriesAddedEvent(GetSeries(newSeries.Id)));
+
+            return newSeries;
+        }
+
+        public List<Series> AddSeries(List<Series> newSeries)
+        {
+            _seriesRepository.InsertMany(newSeries);
+            _eventAggregator.PublishEvent(new SeriesImportedEvent(newSeries.Select(s => s.Id).ToList()));
 
             return newSeries;
         }
