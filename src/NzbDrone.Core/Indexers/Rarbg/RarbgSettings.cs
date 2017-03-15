@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using NzbDrone.Core.Annotations;
 using NzbDrone.Core.ThingiProvider;
 using NzbDrone.Core.Validation;
@@ -21,6 +21,7 @@ namespace NzbDrone.Core.Indexers.Rarbg
         {
             BaseUrl = "https://torrentapi.org";
             RankedOnly = false;
+            MinimumSeeders = 1;
         }
 
         [FieldDefinition(0, Label = "API URL", HelpText = "URL to Rarbg api, not the website.")]
@@ -31,6 +32,9 @@ namespace NzbDrone.Core.Indexers.Rarbg
         
         [FieldDefinition(2, Type = FieldType.Captcha, Label = "CAPTCHA Token", HelpText = "CAPTCHA Clearance token used to handle CloudFlare Anti-DDOS measures on shared-ip VPNs.")]
         public string CaptchaToken { get; set; }
+
+        [FieldDefinition(3, Type = FieldType.Captcha, Label = "Minimum Seeders", HelpText = "Minimum number of seeders required.", Advanced = true)]
+        public int MinimumSeeders { get; set; }
 
         public NzbDroneValidationResult Validate()
         {
