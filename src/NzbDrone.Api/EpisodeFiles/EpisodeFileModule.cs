@@ -16,21 +16,21 @@ namespace NzbDrone.Api.EpisodeFiles
                                  IHandle<EpisodeFileAddedEvent>
     {
         private readonly IMediaFileService _mediaFileService;
-        private readonly IRecycleBinProvider _recycleBinProvider;
+        private readonly IDeleteMediaFiles _mediaFileDeletionService;
         private readonly ISeriesService _seriesService;
         private readonly IQualityUpgradableSpecification _qualityUpgradableSpecification;
         private readonly Logger _logger;
 
         public EpisodeFileModule(IBroadcastSignalRMessage signalRBroadcaster,
                              IMediaFileService mediaFileService,
-                             IRecycleBinProvider recycleBinProvider,
+                             IDeleteMediaFiles mediaFileDeletionService,
                              ISeriesService seriesService,
                              IQualityUpgradableSpecification qualityUpgradableSpecification,
                              Logger logger)
             : base(signalRBroadcaster)
         {
             _mediaFileService = mediaFileService;
-            _recycleBinProvider = recycleBinProvider;
+            _mediaFileDeletionService = mediaFileDeletionService;
             _seriesService = seriesService;
             _qualityUpgradableSpecification = qualityUpgradableSpecification;
             _logger = logger;
@@ -73,11 +73,8 @@ namespace NzbDrone.Api.EpisodeFiles
         {
             var episodeFile = _mediaFileService.Get(id);
             var series = _seriesService.GetSeries(episodeFile.SeriesId);
-            var fullPath = Path.Combine(series.Path, episodeFile.RelativePath);
 
-            _logger.Info("Deleting episode file: {0}", fullPath);
-            _recycleBinProvider.DeleteFile(fullPath);
-            _mediaFileService.Delete(episodeFile, DeleteMediaFileReason.Manual);
+            _mediaFileDeletionService.DeleteEpisodeFile(series, episodeFile);
         }
 
         public void Handle(EpisodeFileAddedEvent message)
